@@ -20,6 +20,7 @@ FIVE_BTN = os.path.join(IMG_DIR, "five.png")
 WHITE = (255, 255, 255)
 GREY = (200, 200, 200)
 BLACK = (0, 0, 0)
+DARK_GREY = (128, 128, 128)
 
 
 class ImageButton(object):
@@ -130,7 +131,7 @@ class Table(object):
         for x, row in enumerate(rows):
             color = WHITE
             if x == self.Selected:
-                color = GREY
+                color = DARK_GREY
 
             single_row = []
             for y,contents in enumerate(row):
