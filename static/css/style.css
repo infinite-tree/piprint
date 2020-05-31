@@ -1,0 +1,76 @@
+body{
+    background-color: #D9DBD5;
+    font-family: "Segoe UI", "Helvetica Neue", "Helvetica", "Lucida Grande", Arial, "Ubuntu", "Cantarell", "Fira Sans", sans-serif;
+    padding-top: 70px;
+}
+
+nav.navbar{
+    background-color: #009688;
+    border: none;
+    box-shadow: 0 0 10px #000;
+    color: white;
+}
+
+nav a.navbar-brand{
+    color: white !important;
+    font-weight: 900;
+}
+
+nav .navbar-nav li a{
+    color: white !important;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.upload-popup{
+    background-color: #fff;
+    box-sizing: border-box;
+    border-radius: 3px;
+    overflow: hidden;
+    padding: 22px 24px 20px;
+    width: 100%;
+    text-align: center;
+    display: table;
+}
+
+.upload-popup input{
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.aloo{
+    background-color: #FFFFFF;
+    margin: 2px;
+    width: 50%;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 14px;
+    padding: 2px 7px 0 7px;
+}
+.aloo .user{
+    font-weight: 900;
+}
+.aloo .time {
+    font-size: 10px;
+    text-align: right;
+    color: #626362;
+    margin-right: 5px;
+    padding: 0;
+}
+.aloo .img-holder {
+    width: auto;
+    display: inline-block;
+}
+
+.aloo .img-holder img {
+    width: 100%;
+    height: auto;
+}
+
+#error_message_box p {
+    font-weight: 900;
+}
