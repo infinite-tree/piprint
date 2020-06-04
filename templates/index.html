@@ -80,9 +80,10 @@
                     1. First open the spreadsheet & tab for the sow date.<br><br>
                     2. Then got to File->Download->Comma Seperated Values (.csv, current sheet).<br><br>
                     3. Last, upload the downloaded csv file.<br>
-                    <form enctype="multipart/form-data">
+                    <form enctype="multipart/form-data" id="upload_form">
                         <input type="file" required>
-                        <input type="submit" class="btn btn-success" id="submit_button" value="Upload CSV">
+                        <input style="margin:15px;" type="button" class="btn btn-success" id="upload_button" name="action" value="Upload CSV" onClick="submitForm(1)">
+                        <input style="margin:15px;" type="button" class="btn btn-success" id="print_button" name="action" value="Direct Print" onClick="submitForm(2)">
                     </form>
                 </div>
                 <div class="row" id="upload-results">

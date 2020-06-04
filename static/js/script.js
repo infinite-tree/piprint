@@ -4,14 +4,22 @@ function show_error_message(error_message){
     error_div.show();
 }
 
-function submitForm (event) {
+
+
+function submitForm (number) {
     event.stopPropagation();
     event.preventDefault();
 
     $('#errors').html('');
 
+    console.log("Action: "+ number);
+    var url = "/upload-file";
+    if (number == 2) {
+        url = "/print-file";
+    }
+
     if (typeof files != 'undefined') {
-        uploadFiles(event);
+        uploadFiles(url);
     } else {
         show_error_message('Please upload a file to proceed.');
     }
@@ -21,17 +29,18 @@ function prepareUpload(event){
     files = event.target.files;
 }
 
-function uploadFiles(event){
+function uploadFiles(url){
     var data = new FormData(),
-        submit_button = $('#submit_button')
-        file_input = submit_button.parent('form').children('input[name="file"]');
+        submit_button = $('#submit_button'),
+        page_form = submit_button.parent('form'),
+        file_input = page_form.children('input[name="file"]');
 
     $.each(files, function(key, value){
         data.append(key, value);
     });
 
     $.ajax({
-        url: '/parse-file',
+        url: url,
         type: 'POST',
         data: data,
         cache: false,
@@ -82,7 +91,7 @@ function restoreForm(event) {
 
 
 $(document).ready(function(){
-    $('form').on('submit', submitForm);
+    // $('form').on('submit', submitForm);
     $('input[type=file]').on('change', prepareUpload);
     $('.nav-back').click(restoreForm);
 })

@@ -36,6 +36,17 @@ class CultivarData(object):
         self.Printed = 0
         self.LabelSets = []
 
+def _print():
+    # generate the pdf to print
+    if PRODUCTION:
+        subprocess.run(["glabels-3-batch", "-i", MERGE_CSV, "-o", PRINT_PDF, LABEL_FILE])
+        subprocess.run(["lp", PRINT_PDF])
+    else:
+        time.sleep(1.5)
+
+    # glabels-3-batch -i <input.csv> -o <output.pdf> <label.glabel>
+    # lp <output.pdf>
+
 
 def printLabel(label_set_groups):
     '''
@@ -52,16 +63,30 @@ def printLabel(label_set_groups):
         for row in contents:
             w.writerow(row)
     
-    # generate the pdf to print
-    if PRODUCTION:
-        subprocess.run(["glabels-3-batch", "-i", MERGE_CSV, "-o", PRINT_PDF, LABEL_FILE])
-        subprocess.run(["lp", PRINT_PDF])
-    else:
-        time.sleep(1.5)
-
-    # glabels-3-batch -i <input.csv> -o <output.pdf> <label.glabel>
-    # lp <output.pdf>
+    _print()
     return
+
+
+def printCSV(csv_file):
+    csv_file.save(MERGE_CSV)
+    rows = []
+    with open(MERGE_CSV) as f:
+        reader = csv.reader(f)
+        rows = [row for row in reader]
+
+    if len(rows) < 2:
+        raise LabelFileError("Not enough rows")
+
+    if "Customer" not in rows[0]:
+        raise LabelFileError("No Customer in header")
+    if "Cultivar" not in rows[0]:
+        raise LabelFileError("No Cultivar in header")
+    if "Tray" not in rows[0]:
+        raise LabelFileError("No Tray in header")
+    if "Lot" not in rows[0]:
+        raise LabelFileError("No Lot in header")
+
+    _print()
 
 
 def saveLabelDataFile(csv_file):

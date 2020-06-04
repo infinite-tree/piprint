@@ -15,8 +15,8 @@ import labels
 app = Flask(__name__)
 
 
-@app.route('/parse-file', methods=['POST'])
-def parse_file():
+@app.route('/upload-file', methods=['POST'])
+def upload_file():
     f = request.files['0']
     response = {
         "success": True
@@ -33,6 +33,23 @@ def parse_file():
     
     return jsonify(response), 200
 
+@app.route('/print-file', methods=['POST'])
+def print_file():
+    f = request.files['0']
+    response = {
+        "success": True
+    }
+    try:
+        labels.printCSV(f)
+    except Exception as e:
+        print("Failed")
+        print(str(e))
+        response = {
+            "success": False,
+            "error_message": str(e)
+        }
+    
+    return jsonify(response), 200    
 
 @app.route('/', methods=['GET'])
 def main():
