@@ -26,6 +26,8 @@ class LabelSet(object):
         self.Trays = trays
         self.Printed = 0
 
+    def __repr__(self):
+        return "%s: %s - %s, %s"%(self.Customer, self.Cultivar, self.Lot, self.Trays)
 
 class CultivarData(object):
     def __init__(self, cultivar, sow_date):
@@ -35,6 +37,7 @@ class CultivarData(object):
         self.TrayCount = None
         self.Printed = 0
         self.LabelSets = []
+
 
 def _print():
     # generate the pdf to print
@@ -108,71 +111,112 @@ def getFileContents():
         raise LabelFileError("Not a CSV File")
 
     # Validate the data
-    if not "Sow Date" in contents[0][0]:
-        raise LabelFileError("Bad file. Sow Date not found")
-    if not "Lots" in contents[1][2]:
-        raise LabelFileError("Bad file. Lot information not found")
+    # if not "Sow Date" in contents[0][0]:
+    #     raise LabelFileError("Bad file. Sow Date not found")
+    # if not "Lots" in contents[1][2]:
+    #     raise LabelFileError("Bad file. Lot information not found")
 
-    if not "Customer" in contents[4][0]:
-        raise LabelFileError("Bad file. Customer information not found")
+    # if not "Customer" in contents[4][0]:
+    #     raise LabelFileError("Bad file. Customer information not found")
 
     return contents
     
 
+
+# def parseFile():
+#     contents = getFileContents()   
+#     #
+#     # Organize the data
+#     #
+#     sow_date = contents[0][1]
+
+
+#     # Get each unique cultivar name
+#     cultivars = []
+#     for idx in range(len(contents[3])):
+#         c = contents[3][idx]
+#         if c == "" and not cultivars:
+#             continue
+#         elif c == "" and cultivars:
+#             cultivar_start_idx = idx+2
+#             break
+#         else:
+#             cultivars.append(CultivarData(c, sow_date))
+
+#     # attach the lot numbers
+#     idx = 3
+#     for c in cultivars:
+#         c.LotNumber = contents[1][idx]
+#         idx += 1
+
+#     # get cultivar positions in the customer table
+#     cultivar_idxs = {}
+#     idx = cultivar_start_idx
+#     for c in cultivars:
+#         cultivar_idxs[idx] = c.Cultivar
+#         idx += 2
+
+#     # Cultivar map
+#     cultivar_map = {}
+#     for c in cultivars:
+#         cultivar_map[c.Cultivar] = c
+
+#     # Build Customer label sets
+#     for row in contents[5:]:
+#         customer = row[0]
+#         for idx,c in cultivar_idxs.items():
+#             if row[idx] not in ["0", ""]:
+#                 trays = int(row[idx])
+#                 cultivar = cultivar_map[c]
+#                 cultivar.LabelSets.append(LabelSet(customer, c, cultivar.LotNumber, trays))
+    
+#     # Sum the tray counts
+#     for c in cultivars:
+#         c.TrayCount = sum([ls.Trays for ls in c.LabelSets])
+    
+#     return cultivars
+
 def parseFile():
+    """
+    Reads the temporary file and returns a list of CultivarData objects
+    """
     contents = getFileContents()   
     #
-    # Organize the data
+    # Collect header data
     #
     sow_date = contents[0][1]
+    # base_lot = contents[1][1]
+    customer = contents[2][1]
 
+    # 
+    # Cultivars start on row 6, which is row 5 with 0 indexing 
+    # The table is: Cultivar Name, Lot Number, Seeds, Trays
+    cultivar_header = 5-1
+    cultivar_row = 6-1
+    name_idx = 0
+    lot_idx = 1
+    # seed_ix = 2
+    tray_idx = 3
 
-    # Get each unique cultivar name
+    # Confirm header and columns
+    # raise LabelFileError("")
+
+    # Process the cultivar table
     cultivars = []
-    for idx in range(len(contents[3])):
-        c = contents[3][idx]
-        if c == "" and not cultivars:
-            continue
-        elif c == "" and cultivars:
-            cultivar_start_idx = idx+2
+    for row in contents[cultivar_row:]:
+        name = row[name_idx]
+        if name == "":
             break
         else:
-            cultivars.append(CultivarData(c, sow_date))
+            lot_number = row[lot_idx]
+            trays = int(row[tray_idx])
 
-    # attach the lot numbers
-    idx = 3
-    for c in cultivars:
-        c.LotNumber = contents[1][idx]
-        idx += 1
+            cd = CultivarData(name, sow_date)
+            ls = LabelSet(customer, name, lot_number, trays)
+            
+            cd.LabelSets.append(ls)
+            cd.TrayCount = ls.Trays
 
-    # get cultivar positions in the customer table
-    cultivar_idxs = {}
-    idx = cultivar_start_idx
-    for c in cultivars:
-        cultivar_idxs[idx] = c.Cultivar
-        idx += 2
+            cultivars.append(cd)
 
-    # Cultivar map
-    cultivar_map = {}
-    for c in cultivars:
-        cultivar_map[c.Cultivar] = c
-
-    # Build Customer label sets
-    for row in contents[5:]:
-        customer = row[0]
-        for idx,c in cultivar_idxs.items():
-            if row[idx] not in ["0", ""]:
-                trays = int(row[idx])
-                cultivar = cultivar_map[c]
-                cultivar.LabelSets.append(LabelSet(customer, c, cultivar.LotNumber, trays))
-    
-    # Sum the tray counts
-    for c in cultivars:
-        c.TrayCount = sum([ls.Trays for ls in c.LabelSets])
-    
     return cultivars
-
-
-    
-
-
