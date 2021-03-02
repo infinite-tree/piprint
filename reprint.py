@@ -53,6 +53,8 @@ class ReprintPanel(object):
             self.TableRows.append([label_set.Cultivar, "-", label_set.Printed, "+"])
         
         self.PrintTable.updateRows(self.TableRows)
+        # auto select the first row
+        self.handleTableSelection(0, 0)
 
     def handleTableSelection(self, row, col):
         line = self.TableRows[row]

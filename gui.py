@@ -88,6 +88,9 @@ class App(object):
 
     def handleReprint(self):
         # Toggle settings mode
+        if not self.InReprint:
+            self.ReprintPanel.updateData(self.LabelData[self.PrintTable.getSelectedRow()])
+
         self.InReprint = not self.InReprint
 
     def _updatePrintTable(self, selected_row=-1):
