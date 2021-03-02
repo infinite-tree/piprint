@@ -16,15 +16,17 @@ class ReprintPanel(object):
         self.Screen = screen
         self.Size = self.Screen.get_size()
         self.CultivarData = cultivar_data
+        self.Customer = ""
         self.ReturnHandler = return_handler
 
         self.BigFont = pygame.font.SysFont("avenir", 48)
         if self.CultivarData:
-            txt = self.CultivarData.Cultivar
+            self.Customer = self.CultivarData.LabelSets[0].Customer
+            txt = self.Customer
         else:
             txt = ""
 
-        self.CultivarText = self.BigFont.render("Cultivar: %s"%txt, 1, widgets.BLACK)
+        self.CustomerText = self.BigFont.render("Customer: %s"%txt, 1, widgets.BLACK)
         self.ReturnButton = widgets.ReturnButton((self.Size[0]-55, 5), self.handleReturn)
 
         self.TableRows = []
@@ -34,7 +36,7 @@ class ReprintPanel(object):
         self.PrevSelected = -1
         self.PrintTable = widgets.Table((50,50),
                                         (700, 400),
-                                        ["        Customer        ", "       ",  "    Tray    ", "       "],
+                                        ["        Cultivar        ", "       ",  "    Tray    ", "       "],
                                         self.TableRows,
                                         self.handleTableSelection)
         button_v_offset = 75
@@ -43,11 +45,12 @@ class ReprintPanel(object):
 
     def updateData(self, cultivar_data):
         self.CultivarData = cultivar_data
-        self.CultivarText = self.BigFont.render("Cultivar: %s"%self.CultivarData.Cultivar, 1, widgets.BLACK)
+        self.Customer = self.CultivarData.LabelSets[0].Customer
+        self.CultivarText = self.BigFont.render("Customer: %s"%self.Customer, 1, widgets.BLACK)
 
         self.TableRows = []
         for label_set in self.CultivarData.LabelSets:
-            self.TableRows.append([label_set.Customer, "-", label_set.Printed, "+"])
+            self.TableRows.append([label_set.Cultivar, "-", label_set.Printed, "+"])
         
         self.PrintTable.updateRows(self.TableRows)
 
@@ -68,10 +71,9 @@ class ReprintPanel(object):
     
     def _getLabelSetFromTable(self, idx):
         cult = self.TableRows[idx][0]
-        cust = self.TableRows[idx][1]
 
         for label_set in self.CultivarData.LabelSets:
-            if label_set.Cultivar == cult and label_set.Customer == cust:
+            if label_set.Cultivar == cult and label_set.Customer == self.Customer:
                 return label_set
         return None
 
@@ -102,7 +104,7 @@ class ReprintPanel(object):
         surface = pygame.surface.Surface(self.Size)
         pygame.draw.rect(surface, widgets.WHITE, (0,0,self.Size[0],self.Size[1]))
 
-        surface.blit(self.CultivarText, (10, 15))
+        surface.blit(self.CustomerText, (10, 15))
         self.ReturnButton.render(surface)
         self.PrintTable.render(surface)
         self.OneButton.render(surface)
