@@ -25,6 +25,7 @@ class LabelSet(object):
         self.Lot = lot
         self.Trays = trays
         self.Printed = 0
+        self.Seeds = 0
 
     def __repr__(self):
         return "%s: %s - %s, %s"%(self.Customer, self.Cultivar, self.Lot, self.Trays)
@@ -188,15 +189,18 @@ def parseFile():
     # base_lot = contents[1][1]
     customer = contents[2][1]
 
-    # 
-    # Cultivars start on row 6, which is row 5 with 0 indexing 
+    #
+    # Cultivars start on row 6, which is row 5 with 0 indexing
     # The table is: Cultivar Name, Lot Number, Seeds, Trays
-    cultivar_header = 5-1
+    header_row = 5-1
     cultivar_row = 6-1
+
+    # Rows:
     name_idx = 0
     lot_idx = 1
-    # seed_ix = 2
+    seed_idx = 2
     tray_idx = 3
+    sown_idx = 4
 
     # Confirm header and columns
     # raise LabelFileError("")
@@ -213,10 +217,52 @@ def parseFile():
 
             cd = CultivarData(name, sow_date)
             ls = LabelSet(customer, name, lot_number, trays)
-            
+            ls.Seeds = row[seed_idx]
+
             cd.LabelSets.append(ls)
             cd.TrayCount = ls.Trays
+
+            if len(row) > sown_idx:
+                ls.Printed = int(row[sown_idx])
+                cd.Printed = ls.Printed
 
             cultivars.append(cd)
 
     return cultivars
+
+
+def saveFile(cultivars):
+    """
+    Write the progress back to the file
+    """
+    contents = getFileContents()
+    #
+    # Cultivars start on row 6, which is row 5 with 0 indexing
+    # The table is: Cultivar Name, Lot Number, Seeds, Trays
+    header_row = 5-1
+    cultivar_row = 6-1
+
+    # Rows:
+    name_idx = 0
+    lot_idx = 1
+    seed_idx = 2
+    tray_idx = 3
+    sown_idx = 4
+
+    with open(LABEL_CSV, "w") as f:
+        csv_writer = csv.writer(f)
+        # Write the pre-amble
+        for x in range(header_row):
+            csv_writer.writerow(contents[x])
+
+        # write the header row
+        if len(contents[x+1]) < sown_idx:
+            csv_writer.writerow(contents[x+1]+["Sown"])
+        else:
+            csv_writer.writerow(contents[x+1])
+
+        # Write the new culitvar rows
+        for cultivar_data in cultivars:
+            for label_set in cultivar_data.LabelSets:
+                row = [label_set.Cultivar, label_set.Lot, label_set.Seeds, label_set.Trays, label_set.Printed]
+                csv_writer.writerow(row)

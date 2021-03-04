@@ -153,6 +153,7 @@ class App(object):
         # Wrap up
         cultivar.Printed += len(to_print)
         self._updatePrintTable(row_idx)
+        labels.saveFile(self.LabelData)
 
     def handlePrintOneSelection(self):
         self.handlePrintSelection(self.PrintTable.getSelectedRow(), 1)
