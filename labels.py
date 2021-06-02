@@ -5,8 +5,9 @@ import time
 
 
 PRODUCTION = os.getenv("PRODUCTION")
+DEFAULT_LABEL_TYPE = "commercial"
 
-LABEL_FILE = os.path.join(os.path.dirname(__file__), "glabels", "label.glabels")
+LABEL_DIR = os.path.join(os.path.dirname(__file__), "glabels")
 
 TMP_DIR = os.path.join(os.path.dirname(__file__), "tmp")
 LABEL_CSV = os.path.join(TMP_DIR, "label_data.csv")
@@ -24,28 +25,35 @@ class LabelSet(object):
         self.Cultivar = cultivar
         self.Lot = lot
         self.Trays = trays
+        self.LabelType = DEFAULT_LABEL_TYPE
+
         self.Printed = 0
         self.Seeds = 0
 
     def __repr__(self):
         return "%s: %s - %s, %s"%(self.Customer, self.Cultivar, self.Lot, self.Trays)
 
+
 class CultivarData(object):
     def __init__(self, cultivar, sow_date):
         self.SowDate = sow_date
         self.Cultivar = cultivar
+        self.LabelType = DEFAULT_LABEL_TYPE
+
         self.LotNumber = None
         self.TrayCount = None
         self.Printed = 0
         self.LabelSets = []
 
 
-def _print():
+def _print(label_type):
     # generate the pdf to print
     if PRODUCTION:
-        subprocess.run(["glabels-3-batch", "-i", MERGE_CSV, "-o", PRINT_PDF, LABEL_FILE])
+        label_file = os.path.join(LABEL_DIR, label_type+".glabels")
+        subprocess.run(["glabels-3-batch", "-i", MERGE_CSV, "-o", PRINT_PDF, label_file])
         subprocess.run(["lp", PRINT_PDF])
     else:
+        print("Printed!")
         time.sleep(1.5)
 
     # glabels-3-batch -i <input.csv> -o <output.pdf> <label.glabel>
@@ -59,15 +67,17 @@ def printLabel(label_set_groups):
     '''
     # Generate the temporary csv file to merge with the labels
     contents = [["Customer", "Cultivar", "Tray", "Lot"]]
+    label_type = DEFAULT_LABEL_TYPE
     for label_set, tray in label_set_groups:
         contents.append([label_set.Customer, label_set.Cultivar, tray, label_set.Lot])
+        label_type = label_set.LabelType
     
     with open(MERGE_CSV, "w") as f:
         w = csv.writer(f)
         for row in contents:
             w.writerow(row)
     
-    _print()
+    _print(label_type)
     return
 
 
@@ -90,7 +100,7 @@ def printCSV(csv_file):
     if "Lot" not in rows[0]:
         raise LabelFileError("No Lot in header")
 
-    _print()
+    _print(DEFAULT_LABEL_TYPE)
 
 
 def saveLabelDataFile(csv_file):
@@ -188,7 +198,10 @@ def parseFile():
     sow_date = contents[0][1]
     # base_lot = contents[1][1]
     customer = contents[2][1]
-
+    label_type = contents[3][1]
+    if not label_type:
+        label_type = DEFAULT_LABEL_TYPE
+    
     #
     # Cultivars start on row 6, which is row 5 with 0 indexing
     # The table is: Cultivar Name, Lot Number, Seeds, Trays
@@ -218,6 +231,8 @@ def parseFile():
             cd = CultivarData(name, sow_date)
             ls = LabelSet(customer, name, lot_number, trays)
             ls.Seeds = row[seed_idx]
+            ls.LabelType = label_type
+            cd.LabelType = label_type
 
             cd.LabelSets.append(ls)
             cd.TrayCount = ls.Trays

@@ -1,7 +1,9 @@
 function show_error_message(error_message){
-    var error_msg_div = $('#error_message_box p');
+    var error_msg_div = $('#error-message-box p');
     error_msg_div.text(error_message);
     error_div.show();
+    console.log("Error");
+    console.log(error_message);
 }
 
 
@@ -52,6 +54,7 @@ function uploadFiles(url){
             upload_prompt_div.hide();
             back_nav.show();
             if(response.success){
+                upload_results_div.show();
                 results_div.append('<b>Success</b>');
             } else {
                 show_error_message(response.error_message);
@@ -87,13 +90,48 @@ function restoreForm(event) {
     back_nav.hide();
     upload_prompt_div.show();
     error_div.hide();
+    upload_results_div.hide();
 }
 
 
+var labelForm;
+function labelFormSetup() {
+	//Setup the single label form
+	labelForm = document.forms['single-label-form'];
+	labelForm.addEventListener('submit', e => {
+		e.preventDefault();
+        
+        var data = new FormData(labelForm);
+		fetch("/print-single-label", {
+            method: 'POST',
+            body: data
+        }).then(response => response.json()).then(data => {
+
+            upload_prompt_div.hide();
+            back_nav.show();
+            if(data.success){
+                $('#label_form').trigger('reset');
+                upload_results_div.show();
+                results_div.append('<b>Success</b>');
+            } else {
+                show_error_message(data.error_message);
+            }
+        }).catch(error => {
+            upload_prompt_div.hide();
+            back_nav.show();
+            show_error_message(error);
+        });
+	});
+}
+
+
+
 $(document).ready(function(){
-    // $('form').on('submit', submitForm);
     $('input[type=file]').on('change', prepareUpload);
     $('.nav-back').click(restoreForm);
+    $('#error-button').click(restoreForm);
+    $('#done-button').click(restoreForm);
+    labelFormSetup();
 })
 
 
@@ -101,6 +139,6 @@ var files,
     upload_prompt_div = $('#upload-section'),
     upload_results_div = $('#upload-results'),
     results_div = upload_results_div.find('#results'),
-    error_div = $('#error_message_box'),
+    error_div = $('#error-message-box'),
     logo_nav = $('.navbar-brand'),
     back_nav = $('li.nav-back');

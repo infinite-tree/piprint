@@ -42,7 +42,7 @@ def print_file():
     try:
         labels.printCSV(f)
     except Exception as e:
-        print("Failed")
+        print("print-file Failed")
         print(str(e))
         response = {
             "success": False,
@@ -50,6 +50,30 @@ def print_file():
         }
     
     return jsonify(response), 200    
+
+@app.route('/print-single-label', methods=['POST'])
+def print_single_label():
+    try:
+        customer = request.form.get('customer')
+        cultivar = request.form.get('cultivar')
+        tray = request.form.get('tray_number')
+        lot = request.form.get('lot_number')
+
+        lsg = labels.LabelSet(customer, cultivar, lot, tray)
+        labels.printLabel([(lsg, tray)])
+
+        response = { "success": True}
+
+    except Exception as e:
+        print("print-single-label failed")
+        print(str(e))
+        response = {
+            "success": False,
+            "error_message": str(e)
+        }
+    
+    return jsonify(response)
+
 
 @app.route('/', methods=['GET'])
 def main():

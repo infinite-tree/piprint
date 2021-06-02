@@ -80,18 +80,39 @@
                     1. First open the spreadsheet & tab for the sow date.<br><br>
                     2. Then got to File->Download->Comma Seperated Values (.csv, current sheet).<br><br>
                     3. Last, upload the downloaded csv file.<br>
+                    <br>
+                    For Direct print, the csv file needs to container a header row and the following columns:
+                    <b>Customer, Cultivar, Tray Number, Lot Number</b>
                     <form enctype="multipart/form-data" id="upload_form">
                         <input type="file" required>
                         <input style="margin:15px;" type="button" class="btn btn-success" id="upload_button" name="action" value="Upload CSV" onClick="submitForm(1)">
-                        <input style="margin:15px;" type="button" class="btn btn-success" id="print_button" name="action" value="Direct Print" onClick="submitForm(2)">
+                        <input style="margin:15px;" type="button" class="btn btn-success" id="print_button" name="action" value="Direct Print a CSV" onClick="submitForm(2)">
+                    </form>                
+                    <hr>
+                    <form id="label_form" name="single-label-form">
+                        <b>Direct Print a single commercial label:</b><br>
+                        <input name="customer" type="text" placeholder="Customer (top line)" required>
+                        <input name="cultivar" type="text" placeholder="Cultivar (bold middle) text" required><br>
+                        <input name="tray_number" type="text" placeholder="Tray Number" required>
+                        <input name="lot_number" type="text" placeholder="Lot Number (small bottom text)" required><br><br>
+                        <button type="submit" class="btn btn-success">print</button>
                     </form>
+                    <br>
+                    <center>
+                        <img src="{{ url_for('static', filename='img/label_template.png') }}" style="width: 75%">
+                    </center>
                 </div>
-                <div class="row" id="upload-results">
+
+                <div class="row" id="upload-results" style="display:none;">
                     <div class="col-md-12" id="results"></div>
+                    <button id="done-button" type="submit" class="btn btn-success">Go Again!</button>
                 </div>
-                <div id="error_message_box" class="{% if error_message is not defined %} hidden {% endif %}">
+                
+                <div id="error-message-box" style="display:none;">
                     <div class="alert alert-danger alert-dismissible">
-                        <p>{{ error_message }}</p>
+                        <p></p>
+                        <br>
+                        <button id="error-button" type="submit" class="btn btn-round">try again</button>
                     </div>
                 </div>
             </div>
