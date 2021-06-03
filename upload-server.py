@@ -18,11 +18,14 @@ app = Flask(__name__)
 @app.route('/upload-file', methods=['POST'])
 def upload_file():
     f = request.files['0']
+    label_type = request.form.get('label_type')
+    print(label_type)
+    
     response = {
         "success": True
     }
     try:
-        labels.saveLabelDataFile(f)
+        labels.saveLabelDataFile(f, label_type)
     except Exception as e:
         print("Failed")
         print(str(e))
@@ -36,11 +39,14 @@ def upload_file():
 @app.route('/print-file', methods=['POST'])
 def print_file():
     f = request.files['0']
+    label_type = request.form.get('label_type')
+    print(label_type)
+
     response = {
         "success": True
     }
     try:
-        labels.printCSV(f)
+        labels.printCSV(f, label_type)
     except Exception as e:
         print("print-file Failed")
         print(str(e))
@@ -58,9 +64,11 @@ def print_single_label():
         cultivar = request.form.get('cultivar')
         tray = request.form.get('tray_number')
         lot = request.form.get('lot_number')
+        label_type = request.form.get('label_type')
+        print(label_type)
 
         lsg = labels.LabelSet(customer, cultivar, lot, tray)
-        labels.printLabel([(lsg, tray)])
+        labels.printLabel([(lsg, tray)], label_type)
 
         response = { "success": True}
 

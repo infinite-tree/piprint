@@ -41,6 +41,8 @@ function uploadFiles(url){
         data.append(key, value);
     });
 
+    data.set("label_type", label_type);
+
     $.ajax({
         url: url,
         type: 'POST',
@@ -102,6 +104,7 @@ function labelFormSetup() {
 		e.preventDefault();
         
         var data = new FormData(labelForm);
+        data.set("label_type", label_type);
 		fetch("/print-single-label", {
             method: 'POST',
             body: data
@@ -124,6 +127,29 @@ function labelFormSetup() {
 	});
 }
 
+function buttonGroupSetup() {
+  $('#labelTypeGroup button').on('click', function() {
+    var thisBtn = $(this);
+    
+    thisBtn.addClass('active').siblings().removeClass('active');
+    var btnText = thisBtn.text();
+    var btnValue = thisBtn.val();
+    console.log(btnText + ' - ' + btnValue);    
+    $('#selectedVal').text(btnValue);
+
+    label_type = btnValue;
+
+    // set the image to show
+    $('#img-commercial').hide();
+    $('#img-retail').hide();
+    $('#img-seed').hide();
+    $('#img-'+btnValue).show();
+
+  });
+  
+  // Set default value
+  $('#labelTypeGroup button[value="commercial"]').click();
+}
 
 
 $(document).ready(function(){
@@ -132,10 +158,12 @@ $(document).ready(function(){
     $('#error-button').click(restoreForm);
     $('#done-button').click(restoreForm);
     labelFormSetup();
+    buttonGroupSetup();
 })
 
 
 var files,
+    label_type,
     upload_prompt_div = $('#upload-section'),
     upload_results_div = $('#upload-results'),
     results_div = upload_results_div.find('#results'),

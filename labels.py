@@ -25,7 +25,6 @@ class LabelSet(object):
         self.Cultivar = cultivar
         self.Lot = lot
         self.Trays = trays
-        self.LabelType = DEFAULT_LABEL_TYPE
 
         self.Printed = 0
         self.Seeds = 0
@@ -38,7 +37,6 @@ class CultivarData(object):
     def __init__(self, cultivar, sow_date):
         self.SowDate = sow_date
         self.Cultivar = cultivar
-        self.LabelType = DEFAULT_LABEL_TYPE
 
         self.LotNumber = None
         self.TrayCount = None
@@ -60,17 +58,19 @@ def _print(label_type):
     # lp <output.pdf>
 
 
-def printLabel(label_set_groups):
+def printLabel(label_set_groups, label_type=None):
     '''
     Prints one label per given label set
-    (label_set, tray_number)
+    [(label_set, tray_number)], label_type
     '''
+    if label_type is None:
+        label_type = DEFAULT_LABEL_TYPE
+    
     # Generate the temporary csv file to merge with the labels
     contents = [["Customer", "Cultivar", "Tray", "Lot"]]
     label_type = DEFAULT_LABEL_TYPE
     for label_set, tray in label_set_groups:
         contents.append([label_set.Customer, label_set.Cultivar, tray, label_set.Lot])
-        label_type = label_set.LabelType
     
     with open(MERGE_CSV, "w") as f:
         w = csv.writer(f)
@@ -81,7 +81,7 @@ def printLabel(label_set_groups):
     return
 
 
-def printCSV(csv_file):
+def printCSV(csv_file, label_type):
     csv_file.save(MERGE_CSV)
     rows = []
     with open(MERGE_CSV) as f:
@@ -100,10 +100,12 @@ def printCSV(csv_file):
     if "Lot" not in rows[0]:
         raise LabelFileError("No Lot in header")
 
-    _print(DEFAULT_LABEL_TYPE)
+    _print(label_type)
 
 
-def saveLabelDataFile(csv_file):
+def saveLabelDataFile(csv_file, label_type):
+    global DEFAULT_LABEL_TYPE
+    DEFAULT_LABEL_TYPE = label_type
     csv_file.save(LABEL_CSV)
     getFileContents()
 
@@ -198,9 +200,6 @@ def parseFile():
     sow_date = contents[0][1]
     # base_lot = contents[1][1]
     customer = contents[2][1]
-    label_type = contents[3][1]
-    if not label_type:
-        label_type = DEFAULT_LABEL_TYPE
     
     #
     # Cultivars start on row 6, which is row 5 with 0 indexing
@@ -231,8 +230,6 @@ def parseFile():
             cd = CultivarData(name, sow_date)
             ls = LabelSet(customer, name, lot_number, trays)
             ls.Seeds = row[seed_idx]
-            ls.LabelType = label_type
-            cd.LabelType = label_type
 
             cd.LabelSets.append(ls)
             cd.TrayCount = ls.Trays
