@@ -2,10 +2,10 @@ import csv
 import os
 import subprocess
 import time
+import json
 
 
 PRODUCTION = os.getenv("PRODUCTION")
-DEFAULT_LABEL_TYPE = "commercial"
 
 LABEL_DIR = os.path.join(os.path.dirname(__file__), "glabels")
 
@@ -13,6 +13,7 @@ TMP_DIR = os.path.join(os.path.dirname(__file__), "tmp")
 LABEL_CSV = os.path.join(TMP_DIR, "label_data.csv")
 PRINT_PDF = os.path.join(TMP_DIR, "labels.pdf")
 MERGE_CSV = os.path.join(TMP_DIR, "merge.csv")
+SETTINGS_JSON = os.path.join(TMP_DIR, "settings.json")
 
 
 class LabelFileError(Exception):
@@ -64,11 +65,11 @@ def printLabel(label_set_groups, label_type=None):
     [(label_set, tray_number)], label_type
     '''
     if label_type is None:
-        label_type = DEFAULT_LABEL_TYPE
+        with open(SETTINGS_JSON) as f:
+            label_type = json.load(f).get('label_type', "commercial")
     
     # Generate the temporary csv file to merge with the labels
     contents = [["Customer", "Cultivar", "Tray", "Lot"]]
-    label_type = DEFAULT_LABEL_TYPE
     for label_set, tray in label_set_groups:
         contents.append([label_set.Customer, label_set.Cultivar, tray, label_set.Lot])
     
@@ -104,8 +105,9 @@ def printCSV(csv_file, label_type):
 
 
 def saveLabelDataFile(csv_file, label_type):
-    global DEFAULT_LABEL_TYPE
-    DEFAULT_LABEL_TYPE = label_type
+    with open(SETTINGS_JSON, "w") as f:
+        json.dump({"label_type": label_type}, f)
+
     csv_file.save(LABEL_CSV)
     getFileContents()
 
